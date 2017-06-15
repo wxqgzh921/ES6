@@ -31,3 +31,33 @@ var target = Object.defineProperty({},'foo',{
 });
 Object.assign(target,{bar:2})  //{bar:2,foo:1}
 Object.assign(target,{foo:2})  //Uncaught TypeError: Cannot assign to read only property 'foo' of object '#<Object>'(…)
+
+
+
+
+-------------------------------------------------------------
+1.浅拷贝 就是把父对象的属性，全部拷贝给子对象。
+var Chinese = {
+	nation:'中国'
+}
+var Doctor = {
+	nation:'医生'
+}
+function extendCopy(p){
+	var c = {};
+	for(var i in p){
+		c[i] = p[i];
+	}
+	c.uber = p;
+	return c;
+}
+var Doctor = extendCopy(Chinese);
+Doctor.career = '医生';
+console.log(Doctor.nation); //中国
+//这样的拷贝有个问题，就是如果父对象的属性等于数组或者另一个对象。实际上，子对象获得的只是一个内存地址，不是真正拷贝，因此存在父对象被篡改的可能。
+//给Chinese添加一个“出生地”属性，它的值是一个数组 chinese。birthPlaces = ['北京','上海','香港'];
+//通过extendCopy() 函数，Doctor继承了Chinese. var Doctor = extendCopy(Chinese);
+//然后，Doctor的“出生地”添加一个城市。 Doctor.birthPlaces.push('厦门');
+//输出结果  alert(Doctor.birthPlaces); //北京, 上海, 香港, 厦门
+          //alert(Chinese.birthPlaces); //北京, 上海, 香港, 厦门
+
