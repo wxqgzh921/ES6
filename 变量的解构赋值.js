@@ -120,3 +120,143 @@ let obj = {first:'hello',last:'world'};
 let {first:f,last:l} = obj;
 f;  //'hello'
 l;  //'world'
+说明：对象的解构赋值是下面形式的简写
+let {foo:foo,bar:bar} = {foo:'aaa',bar:'bbb'};
+对象的解构赋值的内部机制，是先找到同名属性，然后再赋给对应的变量。真正被赋值的是后者，而不是前者。
+let {foo:baz} = {foo:'aaa',bar:'bbb'};
+baz; //'aaa'
+foo; //error：foo is not defined;   foo是匹配的模式，baz才是变量。真正被赋值的是变量baz，而不是模式foo。
+-----------------------------------
+采用这种写法时，变量的声明和赋值是一体的。对于let和const来说，变量不能重新声明，所以一旦赋值的变量以前声明过，就会报错。
+
+let foo;
+let {foo} = {foo: 1}; // SyntaxError: Duplicate declaration "foo"
+
+let baz;
+let {bar: baz} = {bar: 1}; // SyntaxError: Duplicate declaration "baz"
+
+等价于
+
+let foo;
+({foo} = {foo: 1}); // 成功
+
+let baz;
+({bar: baz} = {bar: 1}); // 成功
+---------------------------------------------------
+和数组一样，解构也可以用于嵌套结构的对象。
+let obj = {
+  p: [
+    'Hello',
+    { y: 'World' }
+  ]
+};
+
+let { p: [x, { y }] } = obj;
+x // "Hello"
+y // "World"
+// 这时p是模式，不是变量，因此不会被赋值
+
+var node = {
+  loc:{
+    start:{
+      line:1,
+      column:5
+    }
+  }
+}
+var {loc:{start:{line}}} = node;
+line //1
+loc  //error: loc is undefined
+start //error: loc is undefined
+// 只有line是变量其他都是模式不会被赋值
+
+// 嵌套赋值的例子
+let obj = {};
+let arr = [];
+
+({ foo: obj.prop, bar: arr[0] } = { foo: 123, bar: true });
+obj //{prop:123}
+arr //{true}
+------------------------------------------------------
+对象的解构也可以指定默认值
+var {x=3} ={}
+x //3
+
+
+// var { message: msg = 'Something went wrong' } = {};
+// msg // "Something went wrong"
+var {x,y=5}={x:1};
+x //1
+y //5
+
+var {x:y=3}={};
+x://error x is not defined
+y//3
+var {x:y=3} ={x:5};
+x; //error x is not defined
+y;//5
+var { message: msg = 'Something went wrong' } = {};
+msg; //'Something went wrong'
+message ;//message is not defined
+
+默认值生效的条件是，对象的属性值严格等于undefined。
+
+var {x=3} = {x:undefined};
+x; //3
+var {x=1} = {x:null};
+x; //null
+如果x属性等于null,就不严格等于undefined，导致默认值不会生效。
+如果解构失败，变量的值等于undefined。
+let {foo} = {bar:'baz'};
+foo ;//undefined
+如果解构模式是嵌套的对象，而且子对象所在的父属性不存在，那么将会报错；
+let{foo:{bar}} = {bar:'baz'}
+//等号左边对象的foo属性，对应一个子对象。该子对象的bar属性，解构时会报错。原因很简单，因为foo这时等于undefined，再取子属性就会报错，请看下面的代码。
+let _tmp = {baz:'baz'};
+_tmp.foo.bar  // 报错
+
+如果要将一个已经声明的变量用于解构赋值，必须非常小心。
+let x;
+{x} = {x:1}  //错误的写法
+//正确的写法
+let x; 
+({x} = {x:1});
+将整个解构赋值语句，放在一个圆括号里面，就可以正确执行。
+解构赋值允许，等号左边的模式之中，不放置任何变量名。
+({} = [true,false]);
+({} = 'abc');
+({} = [])
+
+对象的解构赋值，可以很方便地将现有对象的方法，赋值到某个变量。
+let {log,sin,cos} = Math;
+
+由于数组本质是特殊的对象，因此可以对数组进行对象属性的解构。
+let arr = [1,2,3];
+let {0:first,[arr.length-1]:last} = arr;
+first;  //1     对应的arr的0键对应的值是1，
+last;   //3     方括号这种写法，属于“属性名表达式”
+
+-------------------------------------------------------------------------
+4.数值和布尔值的解构赋值
+解构赋值时，如果等号右边是数值和布尔值，则会先转为对象
+let {toString:s} = 123;
+s === Number.prototype.toString  //true
+
+let{toString:s} =true;
+s === Boolean.prototype.toString  //true  
+
+数值和布尔值的包装对象都有toString属性，因此变量s都能取到值。
+解构赋值的规则是，只要等号右边的值不是对象或数组，就先将其转为对象。由于undefined和null无法转为对象，所以对它们进行解构赋值，都会报错。
+let{prop:x} = undefined;  //typeError
+let{prop:y} = null;       //typeError
+
+---------------------------------------------------------------------------
+5.函数参数的解构赋值
+函数的参数也可以使用解构赋值
+function add([x,y]){
+  return x+y;
+}
+add([1,2]);   //3
+
+
+
