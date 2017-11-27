@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>数据与视图双向绑定效果</title>
+</head>
+<body>
+<div>
+	<div>测试用户名：<input type="text" id="username"></div>
+	<div id="show"></div>
+</div>
+</body>
+<script type="text/javascript">
+	var userInfo = {};
+	Object.defineProperty(userInfo,'username',{
+		get:function(){
+			return document.getElementById('username').innerHTML;
+		},
+		set: function(name){
+			document.getElementById('show').innerHTML = name;
+		}
+	});
+	document.getElementById('username').onkeyup = function(e){
+		userInfo.username = this.value;
+	}
+	//
+
+</script> 
+</html>
